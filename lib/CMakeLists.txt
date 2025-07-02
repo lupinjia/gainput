@@ -7,6 +7,8 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -Wall -Wextra -pedantic -Wshadow -Wno-variadic-macros")
 endif()
 
+set(PROJECT_NAME gainput)
+
 include_directories (include/)
 
 file(GLOB_RECURSE sources source/*.cpp source/*.h include/*.h)
@@ -61,7 +63,7 @@ endif()
 
 # Library installation directory
 if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
-    set(CMAKE_INSTALL_LIBDIR lib)
+    set(CMAKE_INSTALL_LIBDIR lib/${PROJECT_NAME})
 endif(NOT DEFINED CMAKE_INSTALL_LIBDIR)
 set(libdir ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
@@ -76,4 +78,33 @@ install(
     LIBRARY DESTINATION "${libdir}"
     ARCHIVE DESTINATION "${libdir}"
     RUNTIME DESTINATION "bin"
+)
+
+#======================生成 xxxConfig.cmake===============================
+set(INCLUDE_DIRS include)
+set(LIBRARIES gainput)
+set(LIB_DIR lib)
+
+# 由cmake提供
+include(CMakePackageConfigHelpers)
+
+# 生成 xxxConfigVersion.cmake文件
+write_basic_package_version_file(
+	${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+	VERSION ${GAINPUT_VERSION}
+	COMPATIBILITY SameMajorVersion
+)
+
+# 用于生成 xxxConfig.cmake文件
+configure_package_config_file(
+	${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in
+	${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+	INSTALL_DESTINATION lib/${PROJECT_NAME}/cmake/
+	PATH_VARS INCLUDE_DIRS LIBRARIES LIB_DIR
+	INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}
+)
+
+install(
+	FILES ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake ${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+	DESTINATION lib/${PROJECT_NAME}/cmake
 )
